@@ -7,6 +7,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="theme-color" content="#000000"/>
 <title>GUYMAN — Lagos</title>
+
+<!-- Limelight: Art Deco display font from Google Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Limelight&display=swap" rel="stylesheet">
+
 <style>
   * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
   html,body { height:100%; overflow:hidden; background:#000;
@@ -19,8 +25,13 @@
             env(safe-area-inset-bottom) env(safe-area-inset-left); }
   .screen.active { display:flex; }
 
+  /* ───────── ART DECO DISPLAY FONT ───────── */
+  .deco { font-family: 'Limelight', ui-monospace, monospace; }
+  .deco-bold { font-family: 'Limelight', ui-monospace, monospace;
+    font-weight: 700; /* synthetic bold — Limelight only ships 400 */ }
+
   #boot { background:#000; gap:24px; }
-  #boot .logo { font-size:64px; letter-spacing:12px; font-weight:900;
+  #boot .logo { font-size:64px; letter-spacing:12px;
     color:#f0c060; text-shadow:0 0 30px rgba(240,192,96,.4); }
   #boot .bar { width:280px; max-width:70vw; height:4px; background:#222;
     border-radius:2px; overflow:hidden; }
@@ -28,7 +39,7 @@
   #boot .status { font-size:12px; opacity:.6; letter-spacing:2px; }
 
   #start { background:rgba(0,0,0,.35); cursor:pointer; gap:16px; }
-  #start .title { font-size:96px; letter-spacing:18px; font-weight:900;
+  #start .title { font-size:96px; letter-spacing:18px;
     color:#f0c060; text-shadow:0 0 40px rgba(240,192,96,.5), 0 4px 0 #000; }
   #start .tag { font-size:14px; letter-spacing:6px; opacity:.7; }
   #start .cta { margin-top:40px; font-size:16px; letter-spacing:4px;
@@ -41,12 +52,14 @@
     text-shadow:0 0 20px rgba(240,192,96,.3); }
   .menu button { background:none; border:none; color:#e8e0d0;
     font:inherit; font-size:20px; letter-spacing:4px; padding:12px 32px;
-    cursor:pointer; transition:color .15s, letter-spacing .15s; }
+    cursor:pointer; transition:color .15s, letter-spacing .15s;
+    font-family: 'Limelight', ui-monospace, monospace; }
   .menu button:hover:not(:disabled) { color:#f0c060; letter-spacing:6px; }
   .menu button:disabled { opacity:.3; cursor:default; }
   .menu .back { margin-top:32px; font-size:14px; opacity:.5; }
 
   .panel { max-width:640px; width:90%; max-height:80vh; overflow-y:auto; }
+  .panel h1 { font-family: 'Limelight', ui-monospace, monospace; }
   .panel h2 { font-size:14px; letter-spacing:4px; opacity:.6; margin:24px 0 12px; }
   .row { display:flex; justify-content:space-between; align-items:center;
     padding:10px 0; border-bottom:1px solid #222; font-size:15px; gap:12px; }
@@ -63,44 +76,27 @@
   #fps { position:fixed; top:8px; right:8px; font-size:11px;
     opacity:.4; z-index:99; }
 
-  /* ───────── MOBILE TOUCH CONTROLS (in-game only) ───────── */
+  /* ───────── MOBILE TOUCH CONTROLS ───────── */
   #touchUI { position:fixed; inset:0; z-index:6; pointer-events:none; display:none; }
   #touchUI.active { display:block; }
-
-  #touchUI .stick {
-    position:absolute; left:24px; bottom:24px;
+  #touchUI .stick { position:absolute; left:24px; bottom:24px;
     width:140px; height:140px; border-radius:50%;
-    border:2px solid rgba(240,192,96,.4);
-    background:rgba(0,0,0,.3);
-    pointer-events:auto;
-    touch-action:none;
-  }
-  #touchUI .stick .knob {
-    position:absolute; top:50%; left:50%;
-    width:60px; height:60px; margin:-30px 0 0 -30px;
-    border-radius:50%; background:rgba(240,192,96,.5);
-    border:2px solid rgba(240,192,96,.8);
-    transition:transform .05s linear;
-  }
-
-  #touchUI .look {
-    position:absolute; right:0; top:0;
-    width:50%; height:100%;
-    pointer-events:auto; touch-action:none;
-  }
-
-  #touchUI .actions {
-    position:absolute; right:24px; bottom:24px;
-    width:180px; height:180px;
-    pointer-events:auto;
-  }
-  #touchUI .actions button {
-    position:absolute; width:64px; height:64px; border-radius:50%;
-    background:rgba(0,0,0,.55); color:#f0c060;
+    border:2px solid rgba(240,192,96,.4); background:rgba(0,0,0,.3);
+    pointer-events:auto; touch-action:none; }
+  #touchUI .stick .knob { position:absolute; top:50%; left:50%;
+    width:60px; height:60px; margin:-30px 0 0 -30px; border-radius:50%;
+    background:rgba(240,192,96,.5); border:2px solid rgba(240,192,96,.8);
+    transition:transform .05s linear; }
+  #touchUI .look { position:absolute; right:0; top:0;
+    width:50%; height:100%; pointer-events:auto; touch-action:none; }
+  #touchUI .actions { position:absolute; right:24px; bottom:24px;
+    width:180px; height:180px; pointer-events:auto; }
+  #touchUI .actions button { position:absolute; width:64px; height:64px;
+    border-radius:50%; background:rgba(0,0,0,.55); color:#f0c060;
     border:2px solid rgba(240,192,96,.6);
-    font-family:inherit; font-size:11px; letter-spacing:1px;
-    touch-action:manipulation; cursor:pointer;
-  }
+    font-family: 'Limelight', ui-monospace, monospace;
+    font-size:10px; letter-spacing:1px;
+    touch-action:manipulation; cursor:pointer; }
   #touchUI .actions button:active { background:rgba(240,192,96,.3); }
   #touchUI .actions .jump   { right:0;    bottom:0; }
   #touchUI .actions .interact { right:70px; bottom:0; }
@@ -108,7 +104,6 @@
   #touchUI .actions .shoot  { right:70px; bottom:70px; background:rgba(120,20,20,.6);
                               border-color:rgba(240,90,90,.7); color:#f09090; }
 
-  /* ───────── MOBILE SCREEN ADJUSTMENTS ───────── */
   @media (max-width: 768px) {
     #boot .logo { font-size:40px; letter-spacing:8px; }
     #start .title { font-size:52px; letter-spacing:8px; }
@@ -135,21 +130,21 @@
 
 <!-- BOOT -->
 <div id="boot" class="screen active">
-  <div class="logo">GUYMAN</div>
+  <div class="logo deco-bold">GUYMAN</div>
   <div class="bar"><i id="bootBar"></i></div>
   <div class="status" id="bootStatus">INITIALIZING</div>
 </div>
 
 <!-- START -->
 <div id="start" class="screen">
-  <div class="title">GUYMAN</div>
-  <div class="tag">LAGOS · NO RULES</div>
-  <div class="cta" id="startCta">CLICK TO START</div>
+  <div class="title deco-bold">GUYMAN</div>
+  <div class="tag deco">LAGOS · NO RULES</div>
+  <div class="cta deco" id="startCta">CLICK TO START</div>
 </div>
 
 <!-- MAIN MENU -->
 <div id="mainmenu" class="screen menu">
-  <h1>MAIN MENU</h1>
+  <h1 class="deco">MAIN MENU</h1>
   <button id="btnContinue" disabled>CONTINUE</button>
   <button id="btnNew">NEW GAME</button>
   <button id="btnSettings">SETTINGS</button>
@@ -161,7 +156,7 @@
 <!-- SETTINGS -->
 <div id="settings" class="screen menu">
   <div class="panel">
-    <h1>SETTINGS</h1>
+    <h1 class="deco">SETTINGS</h1>
     <h2>GRAPHICS</h2>
     <div class="row"><label>Quality</label>
       <select id="setQuality"><option>Low</option><option selected>Medium</option><option>High</option></select></div>
@@ -184,7 +179,7 @@
 <!-- CONTROLS -->
 <div id="controls" class="screen menu">
   <div class="panel">
-    <h1>CONTROLS</h1>
+    <h1 class="deco">CONTROLS</h1>
     <div class="controls-grid">
       <div>
         <h3>ON FOOT (DESKTOP)</h3>
@@ -222,7 +217,7 @@
 <!-- CREDITS -->
 <div id="credits" class="screen menu">
   <div class="panel" style="text-align:center">
-    <h1>CREDITS</h1>
+    <h1 class="deco">CREDITS</h1>
     <p style="line-height:2.4;opacity:.8;margin-top:24px">
       GUYMAN<br>
       A Lagos Sandbox<br><br>
@@ -238,11 +233,9 @@
   </div>
 </div>
 
-<!-- TOUCH CONTROLS (shown only in-game on mobile) -->
+<!-- TOUCH CONTROLS -->
 <div id="touchUI">
-  <div class="stick" id="stick">
-    <div class="knob" id="stickKnob"></div>
-  </div>
+  <div class="stick" id="stick"><div class="knob" id="stickKnob"></div></div>
   <div class="look" id="lookZone"></div>
   <div class="actions">
     <button class="sprint" data-action="sprint">SPRINT</button>
@@ -270,7 +263,6 @@ const isTouch = matchMedia('(pointer: coarse)').matches
   || 'ontouchstart' in window
   || navigator.maxTouchPoints > 0;
 
-// Update Start button text
 document.getElementById('startCta').textContent =
   isTouch ? 'TAP TO START' : 'CLICK TO START';
 
@@ -395,10 +387,7 @@ function bootTick() {
 }
 setTimeout(bootTick, 500);
 
-// Start → Main Menu (works for click AND tap)
-document.getElementById('start').addEventListener('click', () => {
-  show('mainmenu');
-});
+document.getElementById('start').addEventListener('click', () => show('mainmenu'));
 
 document.getElementById('btnNew').addEventListener('click', () => {
   alert('Guyman gameplay is coming next. This build has screens + background only.');
@@ -412,15 +401,12 @@ document.getElementById('btnControls').addEventListener('click', () => {
 document.getElementById('btnCredits').addEventListener('click', () => {
   backTarget = 'mainmenu'; show('credits');
 });
-document.getElementById('btnQuit').addEventListener('click', () => {
-  show('start');
-});
+document.getElementById('btnQuit').addEventListener('click', () => show('start'));
 
 document.getElementById('btnSettingsBack').addEventListener('click', () => show(backTarget));
 document.getElementById('btnControlsBack').addEventListener('click', () => show(backTarget));
 document.getElementById('btnCreditsBack').addEventListener('click', () => show(backTarget));
 
-// Settings persistence
 const setScale = document.getElementById('setScale');
 const setScaleVal = document.getElementById('setScaleVal');
 setScale.addEventListener('input', () => setScaleVal.textContent = setScale.value + '%');
@@ -440,7 +426,6 @@ settingsKeys.forEach(k => {
   el.addEventListener('change', () => localStorage.setItem('guyman_' + k, el.value));
 });
 
-// FPS counter
 let fpsFrames = 0, fpsLast = performance.now();
 const fpsEl = document.getElementById('fps');
 function updateFps() {
@@ -455,7 +440,6 @@ function updateFps() {
 }
 updateFps();
 
-// Escape returns to main menu from any sub-screen (desktop)
 addEventListener('keydown', e => {
   if (e.code === 'Escape') {
     const active = screens.find(s => document.getElementById(s)?.classList.contains('active'));
@@ -465,13 +449,9 @@ addEventListener('keydown', e => {
   }
 });
 
-// ───────── MOBILE TOUCH INPUT (ready for gameplay) ─────────
-// These will feed into the player controller once gameplay is built.
-// For now they're wired but idle — no game loop consumes them yet.
-
+// ───────── MOBILE TOUCH INPUT ─────────
 const touchState = {
-  moveX: 0, moveY: 0,       // -1..1 from left stick
-  lookX: 0, lookY: 0,       // delta from right-side drag
+  moveX: 0, moveY: 0, lookX: 0, lookY: 0,
   sprint: false, jump: false, interact: false, shoot: false
 };
 
@@ -508,7 +488,7 @@ if (isTouch) {
       touchState.moveY = ny / stickRadius;
     }
   }
-  function stickEnd(e) {
+  function stickEnd() {
     stickId = null;
     knob.style.transform = 'translate(0,0)';
     touchState.moveX = 0; touchState.moveY = 0;
@@ -519,7 +499,6 @@ if (isTouch) {
   stick.addEventListener('touchend', stickEnd);
   stick.addEventListener('touchcancel', stickEnd);
 
-  // Look zone (right half drag)
   let lookId = null, lookLast = { x: 0, y: 0 };
   lookZone.addEventListener('touchstart', e => {
     const t = e.changedTouches[0];
@@ -541,7 +520,6 @@ if (isTouch) {
     touchState.lookX = 0; touchState.lookY = 0;
   });
 
-  // Action buttons — press-and-hold sets flag
   actions.forEach(btn => {
     const action = btn.dataset.action;
     const down = e => { e.preventDefault(); touchState[action] = true; };
@@ -552,7 +530,6 @@ if (isTouch) {
   });
 }
 
-// Expose for gameplay module
 window.GUYMAN = { isTouch, touchState };
 </script>
 </body>
