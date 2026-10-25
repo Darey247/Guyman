@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="theme-color" content="#000000"/>
+<title>GUYMAN — Lagos</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body { height:100%; overflow:hidden; background:#000;
+    font-family: ui-monospace, 'Courier New', monospace; color:#e8e0d0;
+    touch-action:none; user-select:none; -webkit-user-select:none; }
+  canvas { display:block; position:fixed; inset:0; }
+  .screen { position:fixed; inset:0; display:none; z-index:10;
+    align-items:center; justify-content:center; flex-direction:column;
+    padding:env(safe-area-inset-top) env(safe-area-inset-right)
+            env(safe-area-inset-bottom) env(safe-area-inset-left); }
+  .screen.active { display:flex; }
+
+  #boot { background:#000; gap:24px; }
+  #boot .logo { font-size:64px; letter-spacing:12px; font-weight:900;
+    color:#f0c060; text-shadow:0 0 30px rgba(240,192,96,.4); }
+  #boot .bar { width:280px; max-width:70vw; height:4px; background:#222;
+    border-radius:2px; overflow:hidden; }
+  #boot .bar > i { display:block; height:100%; width:0%; background:#f0c060; transition:width .3s; }
+  #boot .status { font-size:12px; opacity:.6; letter-spacing:2px; }
+
+  #start { background:rgba(0,0,0,.35); cursor:pointer; gap:16px; }
+  #start .title { font-size:96px; letter-spacing:18px; font-weight:900;
+    color:#f0c060; text-shadow:0 0 40px rgba(240,192,96,.5), 0 4px 0 #000; }
+  #start .tag { font-size:14px; letter-spacing:6px; opacity:.7; }
+  #start .cta { margin-top:40px; font-size:16px; letter-spacing:4px;
+    padding:14px 28px; border:1px solid #f0c060; color:#f0c060;
+    animation:pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:.6} 50%{opacity:1} }
+
+  .menu { background:rgba(0,0,0,.65); backdrop-filter:blur(2px); gap:8px; }
+  .menu h1 { font-size:48px; letter-spacing:10px; color:#f0c060; margin-bottom:32px;
+    text-shadow:0 0 20px rgba(240,192,96,.3); }
+  .menu button { background:none; border:none; color:#e8e0d0;
+    font:inherit; font-size:20px; letter-spacing:4px; padding:12px 32px;
+    cursor:pointer; transition:color .15s, letter-spacing .15s; }
+  .menu button:hover:not(:disabled) { color:#f0c060; letter-spacing:6px; }
+  .menu button:disabled { opacity:.3; cursor:default; }
+  .menu .back { margin-top:32px; font-size:14px; opacity:.5; }
+
+  .panel { max-width:640px; width:90%; max-height:80vh; overflow-y:auto; }
+  .panel h2 { font-size:14px; letter-spacing:4px; opacity:.6; margin:24px 0 12px; }
+  .row { display:flex; justify-content:space-between; align-items:center;
+    padding:10px 0; border-bottom:1px solid #222; font-size:15px; gap:12px; }
+  .row label { opacity:.8; flex-shrink:0; }
+  .row .val { color:#f0c060; min-width:48px; text-align:right; }
+  .row input[type=range] { width:180px; max-width:40vw; accent-color:#f0c060; }
+  .row select { background:#111; color:#e8e0d0; border:1px solid #333;
+    padding:4px 8px; font:inherit; font-size:13px; }
+  .controls-grid { display:grid; grid-template-columns:1fr 1fr; gap:24px;
+    font-size:14px; line-height:2; }
+  .controls-grid h3 { color:#f0c060; letter-spacing:3px; font-size:12px;
+    margin-bottom:8px; }
+
+  #fps { position:fixed; top:8px; right:8px; font-size:11px;
+    opacity:.4; z-index:99; }
+
+  /* ───────── MOBILE TOUCH CONTROLS (in-game only) ───────── */
+  #touchUI { position:fixed; inset:0; z-index:6; pointer-events:none; display:none; }
+  #touchUI.active { display:block; }
+
+  #touchUI .stick {
+    position:absolute; left:24px; bottom:24px;
+    width:140px; height:140px; border-radius:50%;
+    border:2px solid rgba(240,192,96,.4);
+    background:rgba(0,0,0,.3);
+    pointer-events:auto;
+    touch-action:none;
+  }
+  #touchUI .stick .knob {
+    position:absolute; top:50%; left:50%;
+    width:60px; height:60px; margin:-30px 0 0 -30px;
+    border-radius:50%; background:rgba(240,192,96,.5);
+    border:2px solid rgba(240,192,96,.8);
+    transition:transform .05s linear;
+  }
+
+  #touchUI .look {
+    position:absolute; right:0; top:0;
+    width:50%; height:100%;
+    pointer-events:auto; touch-action:none;
+  }
+
+  #touchUI .actions {
+    position:absolute; right:24px; bottom:24px;
+    width:180px; height:180px;
+    pointer-events:auto;
+  }
+  #touchUI .actions button {
+    position:absolute; width:64px; height:64px; border-radius:50%;
+    background:rgba(0,0,0,.55); color:#f0c060;
+    border:2px solid rgba(240,192,96,.6);
+    font-family:inherit; font-size:11px; letter-spacing:1px;
+    touch-action:manipulation; cursor:pointer;
+  }
+  #touchUI .actions button:active { background:rgba(240,192,96,.3); }
+  #touchUI .actions .jump   { right:0;    bottom:0; }
+  #touchUI .actions .interact { right:70px; bottom:0; }
+  #touchUI .actions .sprint { right:0;    bottom:70px; }
+  #touchUI .actions .shoot  { right:70px; bottom:70px; background:rgba(120,20,20,.6);
+                              border-color:rgba(240,90,90,.7); color:#f09090; }
+
+  /* ───────── MOBILE SCREEN ADJUSTMENTS ───────── */
+  @media (max-width: 768px) {
+    #boot .logo { font-size:40px; letter-spacing:8px; }
+    #start .title { font-size:52px; letter-spacing:8px; }
+    #start .tag { font-size:11px; letter-spacing:3px; }
+    #start .cta { font-size:13px; padding:12px 20px; }
+    .menu h1 { font-size:32px; letter-spacing:6px; margin-bottom:24px; }
+    .menu button { font-size:17px; letter-spacing:2px; padding:10px 24px; }
+    .panel h1 { font-size:28px; }
+    .controls-grid { grid-template-columns:1fr; gap:16px; }
+    .row { font-size:13px; }
+    #fps { display:none; }
+  }
+
+  @media (max-height: 500px) and (orientation: landscape) {
+    .menu h1 { font-size:24px; margin-bottom:12px; }
+    .menu button { font-size:14px; padding:6px 16px; }
+    #start .title { font-size:44px; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="bg"></canvas>
+
+<!-- BOOT -->
+<div id="boot" class="screen active">
+  <div class="logo">GUYMAN</div>
+  <div class="bar"><i id="bootBar"></i></div>
+  <div class="status" id="bootStatus">INITIALIZING</div>
+</div>
+
+<!-- START -->
+<div id="start" class="screen">
+  <div class="title">GUYMAN</div>
+  <div class="tag">LAGOS · NO RULES</div>
+  <div class="cta" id="startCta">CLICK TO START</div>
+</div>
+
+<!-- MAIN MENU -->
+<div id="mainmenu" class="screen menu">
+  <h1>MAIN MENU</h1>
+  <button id="btnContinue" disabled>CONTINUE</button>
+  <button id="btnNew">NEW GAME</button>
+  <button id="btnSettings">SETTINGS</button>
+  <button id="btnControls">CONTROLS</button>
+  <button id="btnCredits">CREDITS</button>
+  <button id="btnQuit">QUIT</button>
+</div>
+
+<!-- SETTINGS -->
+<div id="settings" class="screen menu">
+  <div class="panel">
+    <h1>SETTINGS</h1>
+    <h2>GRAPHICS</h2>
+    <div class="row"><label>Quality</label>
+      <select id="setQuality"><option>Low</option><option selected>Medium</option><option>High</option></select></div>
+    <div class="row"><label>Render Scale</label>
+      <input type="range" id="setScale" min="50" max="100" value="100"><span class="val" id="setScaleVal">100%</span></div>
+    <h2>CONTROLS</h2>
+    <div class="row"><label>Look Sensitivity</label>
+      <input type="range" id="setSens" min="1" max="10" value="5"><span class="val" id="setSensVal">5</span></div>
+    <div class="row"><label>Invert Y</label>
+      <select id="setInvert"><option>Off</option><option>On</option></select></div>
+    <h2>INTERFACE</h2>
+    <div class="row"><label>Minimap Mode</label>
+      <select id="setMinimap"><option>Minimap</option><option>Compass</option><option>Off</option></select></div>
+    <div style="text-align:center;margin-top:32px">
+      <button id="btnSettingsBack" class="back">← BACK</button>
+    </div>
+  </div>
+</div>
+
+<!-- CONTROLS -->
+<div id="controls" class="screen menu">
+  <div class="panel">
+    <h1>CONTROLS</h1>
+    <div class="controls-grid">
+      <div>
+        <h3>ON FOOT (DESKTOP)</h3>
+        WASD — Move<br>
+        Mouse — Look<br>
+        Shift — Sprint<br>
+        Space — Jump<br>
+        E — Interact / Enter vehicle<br>
+        LMB — Shoot<br>
+        R — Reload<br>
+        M — Minimap mode<br>
+        Tab — Full map<br>
+        Esc — Pause
+      </div>
+      <div>
+        <h3>ON FOOT (MOBILE)</h3>
+        Left stick — Move<br>
+        Drag right side — Look<br>
+        SPRINT button — Sprint<br>
+        JUMP button — Jump<br>
+        INTERACT button — Interact<br>
+        SHOOT button — Shoot<br>
+        <br>
+        <h3>GENERAL</h3>
+        F1 — FPS counter<br>
+        Esc — Pause
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:32px">
+      <button id="btnControlsBack" class="back">← BACK</button>
+    </div>
+  </div>
+</div>
+
+<!-- CREDITS -->
+<div id="credits" class="screen menu">
+  <div class="panel" style="text-align:center">
+    <h1>CREDITS</h1>
+    <p style="line-height:2.4;opacity:.8;margin-top:24px">
+      GUYMAN<br>
+      A Lagos Sandbox<br><br>
+      Built with Three.js + Rapier<br>
+      Deployed on Vercel<br><br>
+      Inspired by the streets of<br>
+      Lekki · Ikeja · Ikotun<br><br>
+      November 2026
+    </p>
+    <div style="margin-top:32px">
+      <button id="btnCreditsBack" class="back">← BACK</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOUCH CONTROLS (shown only in-game on mobile) -->
+<div id="touchUI">
+  <div class="stick" id="stick">
+    <div class="knob" id="stickKnob"></div>
+  </div>
+  <div class="look" id="lookZone"></div>
+  <div class="actions">
+    <button class="sprint" data-action="sprint">SPRINT</button>
+    <button class="jump" data-action="jump">JUMP</button>
+    <button class="interact" data-action="interact">USE</button>
+    <button class="shoot" data-action="shoot">SHOOT</button>
+  </div>
+</div>
+
+<div id="fps"></div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.169.0/build/three.module.js"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+
+// ───────── DEVICE DETECTION ─────────
+const isTouch = matchMedia('(pointer: coarse)').matches
+  || 'ontouchstart' in window
+  || navigator.maxTouchPoints > 0;
+
+// Update Start button text
+document.getElementById('startCta').textContent =
+  isTouch ? 'TAP TO START' : 'CLICK TO START';
+
+// ───────── ANIMATED BACKGROUND ─────────
+const bgCanvas = document.getElementById('bg');
+const renderer = new THREE.WebGLRenderer({ canvas: bgCanvas, antialias: !isTouch });
+renderer.setPixelRatio(Math.min(devicePixelRatio, isTouch ? 1.0 : 1.5));
+renderer.setSize(innerWidth, innerHeight);
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.1;
+
+const scene = new THREE.Scene();
+scene.fog = new THREE.FogExp2(0x0a0a12, 0.012);
+
+const camera = new THREE.PerspectiveCamera(60, innerWidth / innerHeight, 0.1, 500);
+camera.position.set(0, 8, 30);
+
+scene.add(new THREE.AmbientLight(0x303040, 1.0));
+const moon = new THREE.DirectionalLight(0x8090ff, 0.6);
+moon.position.set(-20, 40, -10);
+scene.add(moon);
+const warm = new THREE.PointLight(0xff9040, 2.0, 60, 2);
+warm.position.set(10, 6, 10);
+scene.add(warm);
+
+const grid = new THREE.GridHelper(200, 40, 0x1a1a2a, 0x0f0f18);
+scene.add(grid);
+
+const buildingMat = new THREE.MeshStandardMaterial({
+  color: 0x2a2a3a, roughness: 0.9, metalness: 0.1
+});
+const accentMat = new THREE.MeshStandardMaterial({
+  color: 0xf0c060, roughness: 0.4, metalness: 0.3,
+  emissive: 0xf0c060, emissiveIntensity: 0.2
+});
+
+const buildings = [];
+const buildingCount = isTouch ? 35 : 60;
+for (let i = 0; i < buildingCount; i++) {
+  const w = 2 + Math.random() * 4;
+  const h = 2 + Math.random() * 14;
+  const d = 2 + Math.random() * 4;
+  const geo = new THREE.BoxGeometry(w, h, d);
+  const mat = Math.random() > 0.92 ? accentMat : buildingMat;
+  const mesh = new THREE.Mesh(geo, mat);
+  const angle = Math.random() * Math.PI * 2;
+  const radius = 15 + Math.random() * 70;
+  mesh.position.set(Math.cos(angle) * radius, h / 2, Math.sin(angle) * radius);
+  mesh.rotation.y = Math.random() * Math.PI;
+  buildings.push({ mesh, baseH: h, phase: Math.random() * Math.PI * 2 });
+  scene.add(mesh);
+}
+
+const horizonGeo = new THREE.RingGeometry(120, 400, 64);
+const horizonMat = new THREE.MeshBasicMaterial({
+  color: 0x1a1a2a, side: THREE.DoubleSide, transparent: true, opacity: 0.8
+});
+const horizon = new THREE.Mesh(horizonGeo, horizonMat);
+horizon.rotation.x = -Math.PI / 2;
+horizon.position.y = -0.5;
+scene.add(horizon);
+
+const clock = new THREE.Clock();
+let bgPaused = false;
+
+function animateBg() {
+  requestAnimationFrame(animateBg);
+  if (bgPaused) return;
+  const t = clock.getElapsedTime();
+  camera.position.x = Math.sin(t * 0.05) * 20;
+  camera.position.z = 30 + Math.cos(t * 0.04) * 10;
+  camera.position.y = 8 + Math.sin(t * 0.06) * 3;
+  camera.lookAt(0, 3, 0);
+  for (let i = 0; i < buildings.length; i++) {
+    const b = buildings[i];
+    b.mesh.position.y = b.baseH / 2 + Math.sin(t * 0.5 + b.phase) * 0.15;
+  }
+  renderer.render(scene, camera);
+}
+animateBg();
+
+addEventListener('resize', () => {
+  camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+
+document.addEventListener('visibilitychange', () => {
+  bgPaused = document.hidden;
+});
+
+// ───────── SCREEN FLOW ─────────
+const screens = ['boot', 'start', 'mainmenu', 'settings', 'controls', 'credits'];
+let backTarget = 'mainmenu';
+
+function show(id) {
+  screens.forEach(s => {
+    const el = document.getElementById(s);
+    if (el) el.classList.toggle('active', s === id);
+  });
+}
+
+const bootBar = document.getElementById('bootBar');
+const bootStatus = document.getElementById('bootStatus');
+const bootSteps = [
+  { p: 20, s: 'LOADING ENGINE' },
+  { p: 45, s: 'BUILDING LAGOS' },
+  { p: 70, s: 'WARMING SHADERS' },
+  { p: 90, s: 'PREPARING STREETS' },
+  { p: 100, s: 'READY' }
+];
+let bootIdx = 0;
+function bootTick() {
+  if (bootIdx >= bootSteps.length) {
+    setTimeout(() => show('start'), 400);
+    return;
+  }
+  const step = bootSteps[bootIdx++];
+  bootBar.style.width = step.p + '%';
+  bootStatus.textContent = step.s;
+  setTimeout(bootTick, 300 + Math.random() * 300);
+}
+setTimeout(bootTick, 500);
+
+// Start → Main Menu (works for click AND tap)
+document.getElementById('start').addEventListener('click', () => {
+  show('mainmenu');
+});
+
+document.getElementById('btnNew').addEventListener('click', () => {
+  alert('Guyman gameplay is coming next. This build has screens + background only.');
+});
+document.getElementById('btnSettings').addEventListener('click', () => {
+  backTarget = 'mainmenu'; show('settings');
+});
+document.getElementById('btnControls').addEventListener('click', () => {
+  backTarget = 'mainmenu'; show('controls');
+});
+document.getElementById('btnCredits').addEventListener('click', () => {
+  backTarget = 'mainmenu'; show('credits');
+});
+document.getElementById('btnQuit').addEventListener('click', () => {
+  show('start');
+});
+
+document.getElementById('btnSettingsBack').addEventListener('click', () => show(backTarget));
+document.getElementById('btnControlsBack').addEventListener('click', () => show(backTarget));
+document.getElementById('btnCreditsBack').addEventListener('click', () => show(backTarget));
+
+// Settings persistence
+const setScale = document.getElementById('setScale');
+const setScaleVal = document.getElementById('setScaleVal');
+setScale.addEventListener('input', () => setScaleVal.textContent = setScale.value + '%');
+
+const setSens = document.getElementById('setSens');
+const setSensVal = document.getElementById('setSensVal');
+setSens.addEventListener('input', () => setSensVal.textContent = setSens.value);
+
+const settingsKeys = ['setQuality', 'setScale', 'setSens', 'setInvert', 'setMinimap'];
+settingsKeys.forEach(k => {
+  const el = document.getElementById(k);
+  const saved = localStorage.getItem('guyman_' + k);
+  if (saved !== null) {
+    if (el.type === 'range') { el.value = saved; el.dispatchEvent(new Event('input')); }
+    else el.value = saved;
+  }
+  el.addEventListener('change', () => localStorage.setItem('guyman_' + k, el.value));
+});
+
+// FPS counter
+let fpsFrames = 0, fpsLast = performance.now();
+const fpsEl = document.getElementById('fps');
+function updateFps() {
+  fpsFrames++;
+  const now = performance.now();
+  if (now - fpsLast >= 1000) {
+    fpsEl.textContent = fpsFrames + ' FPS';
+    fpsFrames = 0;
+    fpsLast = now;
+  }
+  requestAnimationFrame(updateFps);
+}
+updateFps();
+
+// Escape returns to main menu from any sub-screen (desktop)
+addEventListener('keydown', e => {
+  if (e.code === 'Escape') {
+    const active = screens.find(s => document.getElementById(s)?.classList.contains('active'));
+    if (active && active !== 'boot' && active !== 'start' && active !== 'mainmenu') {
+      show(backTarget);
+    }
+  }
+});
+
+// ───────── MOBILE TOUCH INPUT (ready for gameplay) ─────────
+// These will feed into the player controller once gameplay is built.
+// For now they're wired but idle — no game loop consumes them yet.
+
+const touchState = {
+  moveX: 0, moveY: 0,       // -1..1 from left stick
+  lookX: 0, lookY: 0,       // delta from right-side drag
+  sprint: false, jump: false, interact: false, shoot: false
+};
+
+if (isTouch) {
+  const stick = document.getElementById('stick');
+  const knob = document.getElementById('stickKnob');
+  const lookZone = document.getElementById('lookZone');
+  const actions = document.querySelectorAll('#touchUI .actions button');
+
+  let stickId = null;
+  let stickCenter = { x: 0, y: 0 };
+  const stickRadius = 50;
+
+  function stickStart(e) {
+    const t = e.changedTouches ? e.changedTouches[0] : e;
+    stickId = t.identifier ?? 'mouse';
+    const r = stick.getBoundingClientRect();
+    stickCenter = { x: r.left + r.width/2, y: r.top + r.height/2 };
+    stickMove(e);
+  }
+  function stickMove(e) {
+    if (stickId === null) return;
+    const touches = e.changedTouches || [e];
+    for (const t of touches) {
+      if ((t.identifier ?? 'mouse') !== stickId) continue;
+      const dx = t.clientX - stickCenter.x;
+      const dy = t.clientY - stickCenter.y;
+      const len = Math.hypot(dx, dy) || 1;
+      const clamped = Math.min(len, stickRadius);
+      const nx = (dx / len) * clamped;
+      const ny = (dy / len) * clamped;
+      knob.style.transform = `translate(${nx}px, ${ny}px)`;
+      touchState.moveX = nx / stickRadius;
+      touchState.moveY = ny / stickRadius;
+    }
+  }
+  function stickEnd(e) {
+    stickId = null;
+    knob.style.transform = 'translate(0,0)';
+    touchState.moveX = 0; touchState.moveY = 0;
+  }
+
+  stick.addEventListener('touchstart', stickStart, { passive: true });
+  stick.addEventListener('touchmove', stickMove, { passive: true });
+  stick.addEventListener('touchend', stickEnd);
+  stick.addEventListener('touchcancel', stickEnd);
+
+  // Look zone (right half drag)
+  let lookId = null, lookLast = { x: 0, y: 0 };
+  lookZone.addEventListener('touchstart', e => {
+    const t = e.changedTouches[0];
+    lookId = t.identifier;
+    lookLast = { x: t.clientX, y: t.clientY };
+  }, { passive: true });
+  lookZone.addEventListener('touchmove', e => {
+    for (const t of e.changedTouches) {
+      if (t.identifier !== lookId) continue;
+      touchState.lookX = t.clientX - lookLast.x;
+      touchState.lookY = t.clientY - lookLast.y;
+      lookLast = { x: t.clientX, y: t.clientY };
+    }
+  }, { passive: true });
+  lookZone.addEventListener('touchend', e => {
+    for (const t of e.changedTouches) {
+      if (t.identifier === lookId) lookId = null;
+    }
+    touchState.lookX = 0; touchState.lookY = 0;
+  });
+
+  // Action buttons — press-and-hold sets flag
+  actions.forEach(btn => {
+    const action = btn.dataset.action;
+    const down = e => { e.preventDefault(); touchState[action] = true; };
+    const up   = e => { e.preventDefault(); touchState[action] = false; };
+    btn.addEventListener('touchstart', down, { passive: false });
+    btn.addEventListener('touchend', up, { passive: false });
+    btn.addEventListener('touchcancel', up, { passive: false });
+  });
+}
+
+// Expose for gameplay module
+window.GUYMAN = { isTouch, touchState };
+</script>
+</body>
+</html>
