@@ -21,12 +21,13 @@
     background: linear-gradient(135deg, #0a0014, #1a0030);
     flex-direction: column; align-items: center; justify-content: center;
     gap: 24px; color: #ff3ba0;
-    font-size: 14px; letter-spacing: 0.4em; text-align: center;
-    text-transform: uppercase; pointer-events: none;
+    font-size: 14px; letter-weight: 700; letter-spacing: 0.4em; text-align: center;
+    text-transform: uppercase; pointer-events: auto; cursor: pointer;
+    user-select: none; -webkit-user-select: none;
   }
   #rotate .icon { font-size: 96px; animation: spin 2s ease-in-out infinite; }
+  #rotate .hint { font-size: 12px; opacity: 0.8; letter-spacing: 0.28em; }
   @keyframes spin { 0%,100% { transform: rotate(0deg); } 50% { transform: rotate(90deg); } }
-  @media (orientation: portrait) and (pointer: coarse) { #rotate { display: flex; } }
 
   #loading {
     position: fixed; inset: 0; z-index: 100;
@@ -224,7 +225,11 @@
 </head>
 <body>
 
-<div id="rotate"><div class="icon"><i class="bi bi-phone-landscape"></i></div><div>Rotate to landscape</div></div>
+<div id="rotate" aria-label="Rotate to landscape" role="button" tabindex="0">
+  <div class="icon"><i class="bi bi-phone-landscape"></i></div>
+  <div>Rotate to landscape</div>
+  <div class="hint">Tap to switch</div>
+</div>
 
 <div id="loading">
   <h1>GUY MAN</h1>
@@ -372,6 +377,43 @@ import { dof   } from 'three/addons/tsl/display/DOFNode.js';
 import { smaa  } from 'three/addons/tsl/display/SMAANode.js';
 
 const $ = (id) => document.getElementById(id);
+const rotateEl = $('rotate');
+
+function syncLandscapeOverlay() {
+  const isPortrait = window.matchMedia('(orientation: portrait)').matches;
+  const isCoarsePointer = window.matchMedia('(pointer: coarse)').matches;
+  const isFullscreen = !!document.fullscreenElement;
+  const shouldShow = isCoarsePointer && isPortrait && !isFullscreen;
+  rotateEl.style.display = shouldShow ? 'flex' : 'none';
+}
+
+async function requestLandscapeMode() {
+  try {
+    if (document.documentElement.requestFullscreen) {
+      await document.documentElement.requestFullscreen();
+    }
+  } catch (_) {}
+
+  try {
+    if (screen.orientation && typeof screen.orientation.lock === 'function') {
+      await screen.orientation.lock('landscape');
+    }
+  } catch (_) {}
+
+  syncLandscapeOverlay();
+}
+
+rotateEl.addEventListener('click', requestLandscapeMode);
+rotateEl.addEventListener('keydown', (event) => {
+  if (event.key === 'Enter' || event.key === ' ') {
+    event.preventDefault();
+    requestLandscapeMode();
+  }
+});
+window.addEventListener('resize', syncLandscapeOverlay);
+window.addEventListener('orientationchange', syncLandscapeOverlay);
+document.addEventListener('fullscreenchange', syncLandscapeOverlay);
+syncLandscapeOverlay();
 
 // ============================================================================
 // 1. HARDWARE PROBE & SETUP
