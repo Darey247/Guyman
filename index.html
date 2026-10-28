@@ -4,6 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover" />
 <title>GUY MAN</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body {
@@ -34,6 +35,9 @@
     transition: opacity 0.5s ease; gap: 20px;
   }
   #loading.hidden { opacity: 0; pointer-events: none; }
+  #loading.error {
+    background: radial-gradient(circle at center, rgba(255,59,160,0.18), rgba(0,0,0,0.96));
+  }
   #loading h1 {
     font-size: 52px; font-weight: 900; letter-spacing: 0.3em;
     background: linear-gradient(90deg, #ff3ba0, #ff7b3b, #ffd23b);
@@ -75,11 +79,11 @@
   #hud { position: fixed; inset: 0; pointer-events: none; z-index: 10; }
   #hud.hidden { display: none; }
   #score { position: absolute; top: 24px; right: 28px; text-align: right; }
-  #score .val { font-size: 40px; font-weight: 900; background: linear-gradient(180deg, #fff, #ff3ba0); -webkit-background-clip: text; -webkit-text-fill-color: transparent; line-height: 1; text-shadow: 0 0 30px rgba(255,59,160,0.4); }
+  #score .val { font-size: 40px; font-weight: 900; background: linear-gradient(180deg, #fff, #ff3ba0); -webkit-background-clip: text; -webkit-text-fill-color: transparent; line-height: 1; text-shadow: 0 0 30px rgba(255,59,160,0.6); }
   #score .lbl { font-size: 10px; letter-spacing: 0.35em; color: #ff3ba0; margin-top: 4px; text-transform: uppercase; }
   #timer { position: absolute; top: 24px; left: 28px; font-size: 28px; font-weight: 700; color: #ffd23b; text-shadow: 0 0 20px rgba(255,210,59,0.6); font-variant-numeric: tabular-nums; }
   #objective { position: absolute; top: 76px; left: 28px; font-size: 12px; letter-spacing: 0.15em; color: #b8a8c8; text-transform: uppercase; }
-  
+
   #minimapWrap {
     position: absolute; bottom: 24px; right: 24px; width: 200px; height: 200px;
     border: 2px solid rgba(255, 59, 160, 0.6); border-radius: 50%;
@@ -92,7 +96,7 @@
     background: rgba(5, 10, 20, 0.85);
   }
   #minimap { display: block; width: 100%; height: 100%; }
-  
+
   #navDistText {
     position: absolute; bottom: 280px; right: 24px;
     background: rgba(90, 255, 255, 0.9); color: #000;
@@ -103,7 +107,7 @@
   }
   #navDistText.show { display: block; }
 
-  #mode { position: absolute; bottom: 24px; left: 24px; font-size: 11px; letter-spacing: 0.3em; color: #7a6a8a; text-transform: uppercase; padding: 8px 16px; border: 1px solid rgba(255, 59, 160, 0.3); border-radius: 4px; background: rgba(10, 0, 20, 0.7); backdrop-filter: blur(8px); }
+  #mode { position: absolute; bottom: 24px; left: 24px; font-size: 11px; letter-spacing: 0.3em; color: #7a6a8a; text-transform: uppercase; padding: 8px 16px; border: 1px solid rgba(255, 59, 160, 0.4); border-radius: 999px; }
   #mode.active { color: #ff3ba0; border-color: rgba(255,59,160,0.7); }
 
   #carHud {
@@ -113,7 +117,7 @@
   #carHud.show { display: flex; }
   #speedoWrap { position: relative; width: 220px; height: 120px; }
   #speedo { width: 220px; height: 220px; position: absolute; top: 0; left: 0; filter: drop-shadow(0 0 20px rgba(255,59,160,0.5)); }
-  
+
   #fuelWrap {
     position: absolute; left: 20px; bottom: 20px; width: 180px; height: 12px;
     background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; overflow: hidden;
@@ -123,7 +127,7 @@
 
   #mobileControls { position: fixed; inset: 0; pointer-events: none; z-index: 15; display: none; }
   #mobileControls.show { display: block; }
-  
+
   #joystickBase {
     position: absolute; bottom: 40px; left: 40px; width: 120px; height: 120px;
     border-radius: 50%; background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.1);
@@ -134,7 +138,7 @@
     border-radius: 50%; background: rgba(255,59,160,0.4); border: 2px solid rgba(255,59,160,0.8);
     box-shadow: 0 0 20px rgba(255,59,160,0.3);
   }
-  
+
   .action-btn {
     position: absolute; width: 70px; height: 70px; border-radius: 50%;
     background: rgba(10,0,20,0.7); border: 2px solid rgba(255,59,160,0.5);
@@ -142,7 +146,7 @@
     pointer-events: auto; user-select: none; backdrop-filter: blur(4px);
   }
   .action-btn:active { background: rgba(255,59,160,0.3); transform: scale(0.95); }
-  
+
   #btnGas { bottom: 150px; right: 40px; border-color: #7ef0c0; color: #7ef0c0; }
   #btnBrake { bottom: 60px; right: 40px; border-color: #ff5a7a; color: #ff5a7a; }
   #btnEnter { bottom: 60px; right: 130px; border-color: #ffd23b; color: #ffd23b; font-size: 18px; }
@@ -157,12 +161,12 @@
     font-family: -apple-system, BlinkMacSystemFont, sans-serif;
   }
   #phone.open { right: 0; }
-  
+
   #phoneStatus {
     height: 40px; background: rgba(20,20,20,0.9); display: flex; align-items: center;
     justify-content: space-between; padding: 0 20px; font-size: 12px; font-weight: 600; color: #fff;
   }
-  
+
   #phoneContent { flex: 1; overflow-y: auto; overflow-x: hidden; background: linear-gradient(180deg, #1a0030, #0a0014); position: relative; }
   .phone-tab { display: none; padding: 20px; height: 100%; }
   .phone-tab.active { display: block; }
@@ -184,7 +188,7 @@
   #phoneMapCanvas { width: 100%; height: calc(100% - 40px); background: #111; border-radius: 10px; display: block; }
   .phone-map-header { display: flex; justify-content: space-between; margin-bottom: 10px; }
   .phone-map-header button { background: #ff3ba0; color: #fff; border: none; padding: 8px 12px; border-radius: 6px; font-weight: bold; }
-  
+
   #phoneNav { height: 70px; background: rgba(20,20,20,0.95); display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #333; }
   #phoneNav div { font-size: 24px; color: #666; cursor: pointer; padding: 10px; }
   #phoneNav div.active { color: #ff3ba0; }
@@ -195,17 +199,17 @@
     grid-template-columns: 1fr 340px; gap: 40px; opacity: 0; transition: opacity 0.3s ease;
   }
   #pauseMenu.show { display: grid; opacity: 1; }
-  #pauseMenu .mapWrap { position: relative; background: rgba(15, 5, 25, 0.8); border: 1px solid rgba(255, 59, 160, 0.4); border-radius: 8px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+  #pauseMenu .mapWrap { position: relative; background: rgba(15, 5, 25, 0.8); border: 1px solid rgba(255, 59, 160, 0.4); border-radius: 8px; display: flex; align-items: center; justify-content: center; }
   #pauseMenu .mapWrap canvas { max-width: 100%; max-height: 100%; display: block; cursor: crosshair; }
   #pauseMenu .panel { display: flex; flex-direction: column; justify-content: center; gap: 8px; }
   #pauseMenu h2 { font-size: 32px; font-weight: 900; letter-spacing: 0.2em; color: #ff3ba0; margin-bottom: 24px; }
-  #pauseMenu button { padding: 14px 20px; background: transparent; color: #fff; border: 1px solid rgba(255, 59, 160, 0.4); border-radius: 4px; font-size: 12px; letter-spacing: 0.3em; font-weight: 700; text-transform: uppercase; cursor: pointer; transition: all 0.2s ease; text-align: left; }
+  #pauseMenu button { padding: 14px 20px; background: transparent; color: #fff; border: 1px solid rgba(255, 59, 160, 0.4); border-radius: 4px; font-size: 12px; letter-spacing: 0.3em; font-weight: 700; text-transform: uppercase; cursor: pointer; transition: all 0.2s ease; }
   #pauseMenu button:hover { background: rgba(255, 59, 160, 0.15); border-color: #ff3ba0; transform: translateX(4px); }
-  
-  #toast { position: fixed; top: 40%; left: 50%; transform: translateX(-50%); font-size: 24px; font-weight: 900; letter-spacing: 0.15em; text-transform: uppercase; pointer-events: none; z-index: 1000; opacity: 0; transition: opacity 0.3s ease; text-shadow: 0 0 30px currentColor; }
+
+  #toast { position: fixed; top: 40%; left: 50%; transform: translateX(-50%); font-size: 24px; font-weight: 900; letter-spacing: 0.15em; text-transform: uppercase; pointer-events: none; z-index: 300; opacity: 0; transition: opacity 0.2s ease; }
   #toast.show { opacity: 1; }
-  
-  #prompt { position: fixed; top: 62%; left: 50%; transform: translateX(-50%); padding: 10px 22px; background: rgba(255, 59, 160, 0.9); color: #fff; font-size: 12px; letter-spacing: 0.2em; font-weight: 700; text-transform: uppercase; border-radius: 4px; box-shadow: 0 0 30px rgba(255,59,160,0.7); pointer-events: none; z-index: 20; display: none; }
+
+  #prompt { position: fixed; top: 62%; left: 50%; transform: translateX(-50%); padding: 10px 22px; background: rgba(255, 59, 160, 0.9); color: #fff; font-size: 12px; letter-spacing: 0.2em; font-weight: 700; border-radius: 999px; text-transform: uppercase; box-shadow: 0 0 20px rgba(255,59,160,0.4); display: none; }
 </style>
 <script type="importmap">
 {
@@ -244,14 +248,14 @@
   <div id="minimapWrap"><canvas id="minimap" width="480" height="480"></canvas></div>
   <div id="navDistText">1.62 MI</div>
   <div id="mode">ON FOOT</div>
-  <div id="perf" style="position:absolute;top:24px;left:50%;transform:translateX(-50%);font-size:10px;letter-spacing:0.2em;color:#5a5a6a;text-transform:uppercase;background:rgba(0,0,0,0.4);padding:6px 14px;border-radius:4px;"><span id="perfTier">--</span> // <span id="perfFps">--</span> FPS // <span id="perfRes">--</span></div>
+  <div id="perf" style="position:absolute;top:24px;left:50%;transform:translateX(-50%);font-size:10px;letter-spacing:0.2em;color:#5a5a6a;text-transform:uppercase;background:rgba(0,0,0,0.4);padding:6px 10px;border-radius:999px;">WEBGPU READY</div>
 </div>
 
 <div id="carHud">
   <div id="speedoWrap">
     <svg id="speedo" viewBox="0 0 220 220">
       <circle cx="110" cy="110" r="90" fill="none" stroke="rgba(255,59,160,0.15)" stroke-width="3"/>
-      <circle cx="110" cy="110" r="90" fill="none" stroke="#ff3ba0" stroke-width="6" stroke-dasharray="0 565.5" stroke-linecap="round" transform="rotate(135 110 110)" id="speedArc" style="transition: stroke-dasharray 0.1s linear;"/>
+      <circle cx="110" cy="110" r="90" fill="none" stroke="#ff3ba0" stroke-width="6" stroke-dasharray="0 565.5" stroke-linecap="round" transform="rotate(135 110 110)" id="speedArc" style="transition:stroke-dasharray 0.2s ease;"/>
       <text x="110" y="118" text-anchor="middle" font-family="Inter, sans-serif" font-size="40" font-weight="900" fill="#fff" id="speedText">0</text>
       <text x="110" y="140" text-anchor="middle" font-family="Inter, sans-serif" font-size="9" letter-spacing="3" fill="#7a6a8a">KM/H</text>
       <text x="110" y="170" text-anchor="middle" font-family="Inter, sans-serif" font-size="14" font-weight="700" fill="#ff3ba0" id="gearText">N</text>
@@ -295,7 +299,7 @@
         <div class="app-icon"><div class="box" style="background:#AF52DE;">⚙️</div><span>Settings</span></div>
       </div>
     </div>
-    
+
     <div id="tab-map" class="phone-tab">
       <div class="phone-map-header">
         <div style="font-size:18px; font-weight:bold; color:#fff;">Navigation</div>
@@ -342,8 +346,8 @@
 <div id="pauseMenu">
   <div class="mapWrap">
     <canvas id="pauseMap" width="800" height="800"></canvas>
-    <div style="position:absolute;top:16px;left:16px;font-size:10px;letter-spacing:0.3em;color:#ff3ba0;text-transform:uppercase;background:rgba(0,0,0,0.6);padding:6px 12px;border-radius:4px;pointer-events:none;">◈ NAVIGATION</div>
-    <div style="position:absolute;bottom:16px;left:50%;transform:translateX(-50%);font-size:10px;letter-spacing:0.2em;color:#7a6a8a;text-transform:uppercase;background:rgba(0,0,0,0.6);padding:6px 12px;border-radius:4px;pointer-events:none;white-space:nowrap;">CLICK TO SET DESTINATION · ESC TO RESUME</div>
+    <div style="position:absolute;top:16px;left:16px;font-size:10px;letter-spacing:0.3em;color:#ff3ba0;text-transform:uppercase;background:rgba(0,0,0,0.6);padding:6px 12px;border-radius:4px;pointer-events:none;">Route Overview</div>
+    <div style="position:absolute;bottom:16px;left:50%;transform:translateX(-50%);font-size:10px;letter-spacing:0.2em;color:#7a6a8a;text-transform:uppercase;background:rgba(0,0,0,0.6);padding:6px 12px;border-radius:999px;pointer-events:none;">Map</div>
   </div>
   <div class="panel">
     <h2>PAUSED</h2>
@@ -381,6 +385,12 @@ async function probeHardware() {
     mem: navigator.deviceMemory || 4, mobile: isMobileDevice,
     dpr: window.devicePixelRatio || 1,
   };
+
+  const gpu = navigator.gpu;
+  if (!gpu || typeof gpu.requestAdapter !== 'function') {
+    return p;
+  }
+
   try {
     const adapter = await navigator.gpu.requestAdapter({ 
       powerPreference: isMobileDevice ? 'low-power' : 'high-performance' 
@@ -393,6 +403,7 @@ async function probeHardware() {
       p.maxTex    = adapter.limits?.maxTextureDimension2D || 0;
     }
   } catch (_) {}
+
   const sig = p.gpuArch + ' ' + p.gpuDevice + ' ' + p.gpuVendor;
   let s = 0;
   if (/apple|m[1-4]/.test(sig)) s += 0.40;
@@ -416,11 +427,23 @@ async function probeHardware() {
 $('loadStatus').textContent = 'PROBING HARDWARE…';
 const HW = await probeHardware();
 
+if (!navigator.gpu || typeof navigator.gpu.requestAdapter !== 'function') {
+  const loading = $('loading');
+  const status = $('loadStatus');
+  loading.classList.add('error');
+  status.textContent = 'WEBGPU NOT SUPPORTED';
+  status.style.color = '#ff7b3b';
+  status.style.letterSpacing = '0.2em';
+  const h1 = loading.querySelector('h1');
+  if (h1) h1.textContent = 'UNSUPPORTED';
+  throw new Error('WebGPU is not available in this browser. Use Chrome/Edge on localhost or HTTPS.');
+}
+
 // THERMAL-OPTIMIZED PRESETS
 const PRESETS = {
   low:    { dpr: 0.5, maxDpr: 1.0, shadows: false, shadowSize: 512, bloom: false, dof: false, smaa: true, envIntensity: 0.6, fogDensity: 0.020, targetFPS: isMobileDevice ? 30 : 60 },
   medium: { dpr: Math.min(HW.dpr, 0.75), maxDpr: 1.0, shadows: false, shadowSize: 1024, bloom: true, dof: false, smaa: true, envIntensity: 0.9, fogDensity: 0.018, targetFPS: isMobileDevice ? 30 : 60 },
-  high:   { dpr: Math.min(HW.dpr, isMobileDevice ? 1.0 : 1.5), maxDpr: isMobileDevice ? 1.25 : 2.0, shadows: true, shadowSize: 2048, bloom: true, dof: !isMobileDevice, smaa: true, envIntensity: 1.2, fogDensity: 0.016, targetFPS: isMobileDevice ? 30 : 60 },
+  high:   { dpr: Math.min(HW.dpr, isMobileDevice ? 1.0 : 1.5), maxDpr: isMobileDevice ? 1.25 : 2.0, shadows: true, shadowSize: 2048, bloom: true, dof: !isMobileDevice, smaa: true, envIntensity: 1.1, fogDensity: 0.014, targetFPS: isMobileDevice ? 30 : 60 }
 };
 const P = PRESETS[HW.tier];
 
@@ -430,7 +453,17 @@ const renderer = new THREE.WebGPURenderer({
   powerPreference: isMobileDevice ? 'low-power' : 'high-performance', 
   alpha: false 
 });
-await renderer.init();
+try {
+  await renderer.init();
+} catch (error) {
+  const loading = $('loading');
+  const status = $('loadStatus');
+  loading.classList.add('error');
+  status.textContent = 'WEBGPU INIT FAILED';
+  status.style.color = '#ff7b3b';
+  status.style.letterSpacing = '0.2em';
+  throw error;
+}
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(P.dpr);
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -446,9 +479,9 @@ scene.background = new THREE.Color(0x2a1040);
 scene.fog = new THREE.FogExp2(0x2a1040, P.fogDensity);
 const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 500);
 
-// ============================================================================
+// ==========================================================================
 // 2. DYNAMIC DAY/NIGHT CYCLE
-// ============================================================================
+// ==========================================================================
 let timeOfDay = 18; // 0-24 (Start at sunset)
 let isNight = false;
 
@@ -488,13 +521,13 @@ function updateDayNight(dt) {
   timeOfDay += dt * 0.5;
   if (timeOfDay >= 24) timeOfDay -= 24;
   isNight = (timeOfDay < 6 || timeOfDay > 18);
-  
+
   const sunAngle = (timeOfDay / 24) * Math.PI * 2 - Math.PI / 2;
   const sunY = Math.sin(sunAngle) * 80;
   const sunZ = Math.cos(sunAngle) * 80;
-  
+
   sun.position.set(-60, Math.max(5, sunY), sunZ);
-  
+
   if (isNight) {
     sun.intensity = 0.5; sun.color.setHex(0x5a7aff);
     hemi.color.setHex(0x1a2050); hemi.groundColor.setHex(0x050510); hemi.intensity = 0.4;
@@ -506,13 +539,13 @@ function updateDayNight(dt) {
     scene.background.setHex(0x2a1040); scene.fog.color.setHex(0x2a1040);
     renderer.toneMappingExposure = 1.15;
   }
-  
+
   $('minimapWrap').style.background = isNight ? 'rgba(5,10,20,0.85)' : 'rgba(200,200,200,0.85)';
 }
 
-// ============================================================================
+// ==========================================================================
 // 3. CITY SETUP
-// ============================================================================
+// ==========================================================================
 const BLOCK_SIZE = 16; const ROAD_WIDTH = 8; const GRID_N = 5;
 const CITY_SIZE = GRID_N * BLOCK_SIZE + (GRID_N + 1) * ROAD_WIDTH;
 const HALF_CITY = CITY_SIZE / 2;
@@ -609,9 +642,9 @@ function buildingCollides(x, z, pad) {
   return false;
 }
 
-// ============================================================================
+// ==========================================================================
 // 4. ROAD GRAPH & NPCs
-// ============================================================================
+// ==========================================================================
 const nodePos = []; const nodeIndex = (i, j) => i * (GRID_N + 1) + j;
 for (let i = 0; i <= GRID_N; i++) {
   for (let j = 0; j <= GRID_N; j++) {
@@ -669,15 +702,15 @@ function spawnNPCs() {
   }
 }
 
-// ============================================================================
+// ==========================================================================
 // 5. VEHICLES & FUEL
-// ============================================================================
+// ==========================================================================
 const VEH_TYPE_DEFAULTS = {
-  sedan: { engineForce: 12, brakeForce: 22, maxSpeed: 32, maxReverse: 6, drag: 0.001, rollResist: 0.4, steerMax: 0.55, steerSpeed: 6, wheelbase: 2.8, wheelRadius: 0.38, grip: 0.8, driftFactor: 0.2, fuelCap: 60 },
-  sports: { engineForce: 22, brakeForce: 30, maxSpeed: 55, maxReverse: 8, drag: 0.0008, rollResist: 0.3, steerMax: 0.5, steerSpeed: 8, wheelbase: 2.6, wheelRadius: 0.36, grip: 1.0, driftFactor: 0.5, fuelCap: 50 },
-  bike: { engineForce: 18, brakeForce: 25, maxSpeed: 45, maxReverse: 3, drag: 0.001, rollResist: 0.3, steerMax: 0.6, steerSpeed: 8, wheelbase: 1.5, wheelRadius: 0.35, grip: 0.9, driftFactor: 0.8, fuelCap: 30 },
-  truck: { engineForce: 11, brakeForce: 20, maxSpeed: 30, maxReverse: 5, drag: 0.002, rollResist: 0.6, steerMax: 0.45, steerSpeed: 4, wheelbase: 3.6, wheelRadius: 0.48, grip: 0.7, driftFactor: 0.1, fuelCap: 100 },
-  bus: { engineForce: 10, brakeForce: 18, maxSpeed: 26, maxReverse: 4, drag: 0.0025, rollResist: 0.7, steerMax: 0.4, steerSpeed: 3, wheelbase: 4.5, wheelRadius: 0.5, grip: 0.65, driftFactor: 0.05, fuelCap: 150 },
+  sedan: { engineForce: 12, brakeForce: 22, maxSpeed: 32, maxReverse: 6, drag: 0.001, rollResist: 0.4, steerMax: 0.55, steerSpeed: 6, wheelbase: 2.8, wheelRadius: 0.38, grip: 0.8, driftFactor: 0.2, fuelCap: 100 },
+  sports: { engineForce: 22, brakeForce: 30, maxSpeed: 55, maxReverse: 8, drag: 0.0008, rollResist: 0.3, steerMax: 0.5, steerSpeed: 8, wheelbase: 2.6, wheelRadius: 0.36, grip: 1.0, driftFactor: 0.12, fuelCap: 100 },
+  bike: { engineForce: 18, brakeForce: 25, maxSpeed: 45, maxReverse: 3, drag: 0.001, rollResist: 0.3, steerMax: 0.6, steerSpeed: 8, wheelbase: 1.5, wheelRadius: 0.35, grip: 0.9, driftFactor: 0.15, fuelCap: 80 },
+  truck: { engineForce: 11, brakeForce: 20, maxSpeed: 30, maxReverse: 5, drag: 0.002, rollResist: 0.6, steerMax: 0.45, steerSpeed: 4, wheelbase: 3.6, wheelRadius: 0.48, grip: 0.7, driftFactor: 0.05, fuelCap: 120 },
+  bus: { engineForce: 10, brakeForce: 18, maxSpeed: 26, maxReverse: 4, drag: 0.0025, rollResist: 0.7, steerMax: 0.4, steerSpeed: 3, wheelbase: 4.5, wheelRadius: 0.5, grip: 0.65, driftFactor: 0.04, fuelCap: 140 },
 };
 const VEHICLE_CONFIGS = [
   { id: 'sportbike', name: 'Sport Bike', type: 'bike', color: 0xff2050, width: 0.45, length: 2.0 },
@@ -710,7 +743,7 @@ function buildVehicleMesh(cfg) {
   const wb = cfg.type === 'bike' ? 1.5 : 2.8;
   const wDefs = cfg.type === 'bike' ? [[0, -wb/2], [0, wb/2]] : [[-W/2 - 0.02, -wb/2], [W/2 + 0.02, -wb/2], [-W/2 - 0.02, wb/2], [W/2 + 0.02, wb/2]];
   const wheels = [];
-  for (const [x, z] of wDefs) { const pivot = new THREE.Group(); pivot.position.set(x, 0.4, z); const wheel = new THREE.Mesh(wheelGeo, wheelMat); pivot.add(wheel); root.add(pivot); wheels.push({ pivot, isFront: z > 0 }); }
+  for (const [x, z] of wDefs) { const pivot = new THREE.Group(); pivot.position.set(x, 0.4, z); const wheel = new THREE.Mesh(wheelGeo, wheelMat); pivot.add(wheel); root.add(pivot); wheels.push({ pivot, isFront: z < 0 }); }
   return { root, bodyPivot, wheels };
 }
 const vehicles = [];
@@ -998,252 +1031,114 @@ function updateDrive(dt) {
   v.physics.update(dt, { throttle, brake, steer, boost: keys['ShiftLeft'] || keys['ShiftRight'] }); syncVehicleMesh(v);
   const camOffset = new THREE.Vector3(0, 4.5, -9.5).applyAxisAngle(new THREE.Vector3(0, 1, 0), v.physics.heading);
   camera.position.lerp(v.physics.position.clone().add(camOffset), 1 - Math.exp(-8 * dt));
-  camera.lookAt(v.physics.position.clone().add(new THREE.Vector3(0, 1.5, 0)));
-  $('fuelBar').style.width = `${(v.physics.fuel / v.physics.cfg.fuelCap) * 100}%`; $('fuelBar').style.background = v.physics.fuel > 10 ? '#7ef0c0' : '#ff5a7a';
-  for (const gs of gasStations) { if (Math.hypot(v.physics.position.x - gs.x, v.physics.position.z - gs.z) < 5) { v.physics.fuel = Math.min(v.physics.cfg.fuelCap, v.physics.fuel + 20 * dt); } }
+  camera.lookAt(v.physics.position.clone().add(new THREE.Vector3(0, 1.6, 0)));
+  $('fuelBar').style.width = `${(v.physics.fuel / v.physics.cfg.fuelCap) * 100}%`;
+  $('fuelBar').style.background = v.physics.fuel > 10 ? '#7ef0c0' : '#ff5a7a';
+  const speedPct = Math.min(1, Math.abs(v.physics.speed) / v.physics.cfg.maxSpeed);
+  const arc = 2 * Math.PI * 0.75 * speedPct;
+  $('speedArc').setAttribute('stroke-dasharray', `${arc} 565.5`);
+  $('speedText').textContent = `${Math.floor(Math.abs(v.physics.speed))}`;
+  $('gearText').textContent = v.physics.speed >= 0 ? 'D' : 'R';
+  if (navigation.destination) {
+    navigation.route = computeRoute(v.physics.position.x, v.physics.position.z, navigation.destination.x, navigation.destination.z);
+    navigation.currentWaypoint = 0;
+    const center = navigation.route.waypoints[navigation.route.waypoints.length - 1];
+    $('navDistText').textContent = `${Math.max(0.2, navigation.route.distance / 30).toFixed(2)} MI`;
+    $('navDistText').classList.add('show');
+  }
   checkPickup(v.physics.position.x, v.physics.position.z);
-  $('prompt').style.display = Math.abs(v.physics.speed) < 2 ? 'block' : 'none'; if (Math.abs(v.physics.speed) < 2) $('prompt').textContent = "PRESS E / TAP 'E' TO EXIT";
-  const speedKmh = Math.abs(v.physics.speed) * 3.6; const maxKmh = v.physics.cfg.maxSpeed * 3.6; const ratio = Math.min(1, speedKmh / maxKmh);
-  const circumference = 2 * Math.PI * 90; const fill = ratio * (0.75 * circumference);
-  $('speedArc').setAttribute('stroke-dasharray', `${fill} ${circumference}`); $('speedArc').setAttribute('stroke', ratio > 0.85 ? '#ff5a7a' : '#ff3ba0');
-  $('speedText').textContent = Math.round(speedKmh); let gear = 'N';
-  if (v.physics.speed > 0.5) gear = ratio < 0.2 ? '1' : ratio < 0.4 ? '2' : ratio < 0.6 ? '3' : ratio < 0.8 ? '4' : '5'; else if (v.physics.speed < -0.5) gear = 'R';
-  $('gearText').textContent = gear;
-  if (navigation.route) {
-    while (navigation.currentWaypoint < navigation.route.waypoints.length - 1) { const wp = navigation.route.waypoints[navigation.currentWaypoint]; if (Math.hypot(wp.x - v.physics.position.x, wp.z - v.physics.position.z) < 5) navigation.currentWaypoint++; else break; }
-    const cur = navigation.route.waypoints[navigation.currentWaypoint]; const dist = Math.hypot(cur.x - v.physics.position.x, cur.z - v.physics.position.z);
-    $('navDistText').textContent = `${(dist * 0.000621371).toFixed(2)} MI`;
-  }
-}
-function updateNPCs(dt) {
-  for (const npc of npcs) {
-    npc.timer -= dt; const d = npc.mesh.userData;
-    if (npc.state === 'idle') {
-      d.leftLeg.rotation.x *= 0.85; d.rightLeg.rotation.x *= 0.85; d.leftArm.rotation.x *= 0.85; d.rightArm.rotation.x *= 0.85;
-      if (npc.timer <= 0) { npc.target.set(npc.mesh.position.x + (Math.random() - 0.5) * 20, 0, npc.mesh.position.z + (Math.random() - 0.5) * 20); npc.state = 'walk'; npc.timer = 10; }
-    } else if (npc.state === 'walk') {
-      const dx = npc.target.x - npc.mesh.position.x; const dz = npc.target.z - npc.mesh.position.z; const dist = Math.hypot(dx, dz);
-      if (dist < 0.5 || npc.timer <= 0) { npc.state = 'idle'; npc.timer = 1 + Math.random() * 3; continue; }
-      const nx = dx / dist, nz = dz / dist; npc.mesh.position.x += nx * npc.speed * dt; npc.mesh.position.z += nz * npc.speed * dt;
-      npc.mesh.rotation.y = Math.atan2(nx, nz); d.walkPhase += dt * npc.speed * 4.5;
-      const swing = Math.sin(d.walkPhase) * 0.4; d.leftLeg.rotation.x = swing; d.rightLeg.rotation.x = -swing; d.leftArm.rotation.x = -swing * 0.75; d.rightArm.rotation.x = swing * 0.75;
-    }
-  }
 }
 
-// ============================================================================
-// 11. MINIMAP & PAUSE MAP
-// ============================================================================
-const mm = $('minimap'); const mmCtx = mm.getContext('2d');
-function drawMinimap() {
-  const size = mm.width, center = size / 2; mmCtx.clearRect(0, 0, size, size);
-  const px = player.mode === 'walk' ? protagonist.position.x : player.currentVehicle.physics.position.x;
-  const pz = player.mode === 'walk' ? protagonist.position.z : player.currentVehicle.physics.position.z;
-  const heading = player.mode === 'walk' ? player.yaw : player.currentVehicle.physics.heading;
-  const isNav = player.mode === 'drive';
-  mmCtx.save(); mmCtx.beginPath(); mmCtx.arc(center, center, center - 2, 0, Math.PI * 2); mmCtx.clip();
-  mmCtx.fillStyle = isNight ? '#0a1420' : '#e0e0e0'; mmCtx.fillRect(0, 0, size, size);
-  const viewRadius = isNav ? 55 : 45; const scale = (size / 2) / viewRadius;
-  mmCtx.save(); mmCtx.translate(center, center); if (isNav) mmCtx.rotate(heading - Math.PI);
-  mmCtx.strokeStyle = isNight ? 'rgba(90, 255, 255, 0.35)' : '#ffffff'; mmCtx.lineWidth = isNav ? 8 : 6;
-  for (let i = 0; i <= GRID_N; i++) {
-    const p = (-HALF_CITY + i * (BLOCK_SIZE + ROAD_WIDTH) + ROAD_WIDTH/2); const ppx = (p - px) * scale;
-    mmCtx.beginPath(); mmCtx.moveTo(ppx, -viewRadius*2); mmCtx.lineTo(ppx, viewRadius*2); mmCtx.stroke();
-    mmCtx.beginPath(); mmCtx.moveTo(-viewRadius*2, ppx); mmCtx.lineTo(viewRadius*2, ppx); mmCtx.stroke();
-  }
-  for (const b of buildingList) {
-    const bx = (b.x - px) * scale, bz = (b.z - pz) * scale;
-    if (Math.abs(bx) > viewRadius * scale + 50 || Math.abs(bz) > viewRadius * scale + 50) continue;
-    mmCtx.fillStyle = isNight ? 'rgba(20, 10, 40, 0.9)' : '#999';
-    mmCtx.fillRect(bx - b.w * scale/2, bz - b.d * scale/2, b.w * scale, b.d * scale);
-  }
-  if (navigation.route) {
-    mmCtx.strokeStyle = '#5affff'; mmCtx.lineWidth = 4; mmCtx.shadowColor = '#5affff'; mmCtx.shadowBlur = 12;
-    mmCtx.beginPath();
-    for (let i = 0; i < navigation.route.waypoints.length; i++) {
-      const wp = navigation.route.waypoints[i]; const x = (wp.x - px) * scale, z = (wp.z - pz) * scale;
-      if (i === 0) mmCtx.moveTo(x, z); else mmCtx.lineTo(x, z);
-    }
-    mmCtx.stroke(); mmCtx.shadowBlur = 0;
-    const dest = navigation.route.waypoints[navigation.route.waypoints.length - 1];
-    mmCtx.fillStyle = '#ff3ba0'; mmCtx.beginPath(); mmCtx.arc((dest.x - px) * scale, (dest.z - pz) * scale, 6, 0, Math.PI * 2); mmCtx.fill();
-  }
-  mmCtx.restore();
-  mmCtx.fillStyle = isNav ? '#5affff' : '#7ef0c0'; mmCtx.shadowColor = isNav ? '#5affff' : '#7ef0c0'; mmCtx.shadowBlur = 16;
-  mmCtx.beginPath(); mmCtx.moveTo(center, center - 10); mmCtx.lineTo(center + 7, center + 7); mmCtx.lineTo(center, center + 3); mmCtx.lineTo(center - 7, center + 7); mmCtx.closePath(); mmCtx.fill();
-  mmCtx.shadowBlur = 0; mmCtx.restore();
-}
-
-const pauseMap = $('pauseMap'); const pmCtx = pauseMap.getContext('2d');
-pauseMap.addEventListener('click', (e) => {
-  const rect = pauseMap.getBoundingClientRect(); const mx = (e.clientX - rect.left) * (pauseMap.width / rect.width); const mz = (e.clientY - rect.top) * (pauseMap.height / rect.height);
-  const cx = pauseMap.width / 2, cz = pauseMap.height / 2; const sc = (pauseMap.width - 60) / CITY_SIZE; const wx = (mx - cx) / sc, wz = (mz - cz) / sc;
-  if (Math.abs(wx) < HALF_CITY && Math.abs(wz) < HALF_CITY) {
-    navigation.destination = { x: wx, z: wz };
-    const px = player.mode === 'walk' ? protagonist.position.x : player.currentVehicle.physics.position.x;
-    const pz = player.mode === 'walk' ? protagonist.position.z : player.currentVehicle.physics.position.z;
-    navigation.route = computeRoute(px, pz, wx, wz); navigation.currentWaypoint = 0;
-    drawPauseMap(); showToast('DESTINATION SET', '#5affff');
-  }
-});
-function drawPauseMap() {
-  pmCtx.fillStyle = '#05000a'; pmCtx.fillRect(0, 0, pauseMap.width, pauseMap.height);
-  const cx = pauseMap.width / 2, cz = pauseMap.height / 2; const sc = (pauseMap.width - 60) / CITY_SIZE;
-  pmCtx.strokeStyle = 'rgba(255, 59, 160, 0.3)'; pmCtx.lineWidth = 8;
-  for (let i = 0; i <= GRID_N; i++) {
-    const p = (-HALF_CITY + i * (BLOCK_SIZE + ROAD_WIDTH) + ROAD_WIDTH/2);
-    pmCtx.beginPath(); pmCtx.moveTo(cx + p*sc, 0); pmCtx.lineTo(cx + p*sc, pauseMap.height); pmCtx.stroke();
-    pmCtx.beginPath(); pmCtx.moveTo(0, cz + p*sc); pmCtx.lineTo(pauseMap.width, cz + p*sc); pmCtx.stroke();
-  }
-  for (const b of buildingList) { pmCtx.fillStyle = 'rgba(200, 100, 200, 0.3)'; pmCtx.fillRect(cx + (b.x - b.w/2)*sc, cz + (b.z - b.d/2)*sc, b.w*sc, b.d*sc); }
-  if (navigation.route) {
-    pmCtx.strokeStyle = '#5affff'; pmCtx.lineWidth = 4; pmCtx.shadowColor = '#5affff'; pmCtx.shadowBlur = 12;
-    pmCtx.beginPath();
-    for (let i = 0; i < navigation.route.waypoints.length; i++) {
-      const wp = navigation.route.waypoints[i]; const x = cx + wp.x*sc, z = cz + wp.z*sc;
-      if (i === 0) pmCtx.moveTo(x, z); else pmCtx.lineTo(x, z);
-    }
-    pmCtx.stroke(); pmCtx.shadowBlur = 0;
-  }
-  const px = player.mode === 'walk' ? protagonist.position.x : player.currentVehicle.physics.position.x;
-  const pz = player.mode === 'walk' ? protagonist.position.z : player.currentVehicle.physics.position.z;
-  pmCtx.fillStyle = '#7ef0c0'; pmCtx.beginPath(); pmCtx.arc(cx + px*sc, cz + pz*sc, 8, 0, Math.PI * 2); pmCtx.fill();
-}
-
-// ============================================================================
-// 12. MENUS & BOOT
-// ============================================================================
-function showMainMenu() { game.phase = 'menu'; $('mainMenu').classList.remove('hidden'); $('hud').classList.add('hidden'); $('mobileControls').classList.remove('show'); }
-function startGame() {
-  try { if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => {}); if (screen.orientation && screen.orientation.lock) screen.orientation.lock('landscape').catch(() => {}); } catch (_) {}
-  game.phase = 'playing'; $('mainMenu').classList.add('hidden'); $('hud').classList.remove('hidden'); $('mobileControls').classList.add('show');
-  resetGame(); clock.getDelta();
-}
-function openPauseMenu() { game.phase = 'paused'; $('pauseMenu').classList.add('show'); drawPauseMap(); if (player.mode === 'walk') document.exitPointerLock?.(); }
-function closePauseMenu() { game.phase = 'playing'; $('pauseMenu').classList.remove('show'); clock.getDelta(); }
-function resetGame() {
-  game.score = 0; game.timeLeft = game.targetTime; $('scoreVal').textContent = 0; $('pkgCount').textContent = '0/5';
-  player.mode = 'walk'; player.currentVehicle = null; protagonist.visible = true;
-  protagonist.position.set(START_X, 0, START_Z); protagonist.rotation.y = 0; player.yaw = 0;
-  navigation.destination = null; navigation.route = null;
-  $('mode').textContent = 'ON FOOT'; $('mode').classList.remove('active'); $('carHud').classList.remove('show'); $('minimapWrap').classList.remove('nav'); $('navDistText').classList.remove('show');
-  spawnPackages(); phoneEl.classList.remove('open');
-}
-$('btnPlay').addEventListener('click', startGame);
-$('btnControls').addEventListener('click', () => showToast('WASD / JOYSTICK · MOVE · SHIFT · RUN · E · ENTER CAR · ESC · MAP · ↑ / 📱 · PHONE', '#ff3ba0'));
-$('btnResume').addEventListener('click', closePauseMenu); $('btnClearPin').addEventListener('click', clearPhoneRoute);
-$('btnRestart').addEventListener('click', () => { resetGame(); closePauseMenu(); });
-$('btnToMenu').addEventListener('click', () => { $('pauseMenu').classList.remove('show'); showMainMenu(); });
-
-// ============================================================================
-// 13. POST-PROCESSING & THERMAL ENGINE
-// ============================================================================
-const postProcessing = new THREE.PostProcessing(renderer);
-const scenePass = pass(scene, camera);
-scenePass.setMRT(mrt({ output, normal: normalView, depth }));
-const colorTex = scenePass.getTextureNode('output');
-const viewZNode = scenePass.getViewZNode();
-
-let chain = colorTex;
-if (P.bloom) { try { chain = bloom(chain, 0.9, 0.5, 0.82); } catch (e) {} }
-if (P.dof) { try { chain = dof(chain, viewZNode, 12.0, 20.0, 0.9); } catch (e) {} }
-
-const graded = Fn(([inputColor]) => {
-  const rgb = inputColor.rgb;
-  const lum = dot(rgb, vec3(0.2126, 0.7152, 0.0722));
-  const sat = mix(vec3(lum, lum, lum), rgb, 1.18);
-  const tinted = sat.mul(vec3(1.05, 0.98, 1.02));
-  const contrasted = tinted.sub(0.5).mul(1.10).add(0.5);
-  const uvC = screenUV.sub(0.5);
-  const vig = smoothstep(0.85, 0.25, length(uvC) * 1.5).mul(0.65).add(0.35);
-  return vec4(contrasted.mul(vig), 1.0);
-});
-
-let finalChain = graded(chain);
-if (P.smaa) { try { finalChain = smaa(finalChain); } catch (e) {} }
-postProcessing.outputNode = finalChain;
-postProcessing.needsUpdate = true;
-
-class AdaptiveQuality {
-  constructor(renderer, preset) {
-    this.renderer = renderer; this.cur = preset.dpr; this.min = 0.35; this.max = preset.maxDpr;
-    this.frameTimes = []; this.window = 60; this.state = 'warmup'; this.frames = 0; this._lastT = undefined;
-  }
-  tick(now) {
-    this.frames++;
-    if (this._lastT !== undefined) { const dt = now - this._lastT; if (dt < 200) this.frameTimes.push(dt); }
-    this._lastT = now;
-    if (this.state === 'warmup' && this.frames > 90) { this.state = 'steady'; this.frames = 0; return; }
-    if (this.state !== 'steady') return;
-    if (this.frameTimes.length < this.window) return;
-    const avg = this.frameTimes.reduce((a, b) => a + b, 0) / this.frameTimes.length;
-    const fps = 1000 / avg; this.frameTimes.length = 0;
-    $('perfFps').textContent = fps.toFixed(0);
-    if (fps < 28 && this.cur > this.min) { this.cur -= 0.05; this.renderer.setPixelRatio(this.cur); this.state = 'cooldown'; this.frames = 0; }
-    else if (fps > 32 && this.cur < this.max) { this.cur += 0.02; this.renderer.setPixelRatio(this.cur); this.state = 'cooldown'; this.frames = 0; }
-    if (this.state === 'cooldown' && this.frames > 60) this.state = 'steady';
-    $('perfRes').textContent = `${Math.round(this.cur * 100)}%`;
-  }
-}
-const adaptive = new AdaptiveQuality(renderer, P);
-$('perfTier').textContent = HW.tier.toUpperCase();
-$('perfTier').style.color = HW.tier === 'high' ? '#7ef0c0' : HW.tier === 'medium' ? '#ffd23b' : '#ff5a7a';
-
-// ============================================================================
-// 14. THERMAL-RENDER LOOP
-// ============================================================================
-const clock = new THREE.Clock();
-let lastRenderTime = 0;
-let needsRender = true;
-const frameInterval = 1000 / P.targetFPS;
-
-function animate(now) {
-  // DIRTY FLAG: If paused, stop rendering entirely to let GPU cool
-  if (game.phase === 'paused') {
-    if (needsRender) { postProcessing.render(); needsRender = false; }
-    return;
-  }
-
-  // FRAME LIMITER: Cap mobile at 30 FPS to reduce heat
-  if (now - lastRenderTime < frameInterval) return;
-  lastRenderTime = now;
-
-  const dt = Math.min(clock.getDelta(), 0.05);
-
+function animateFrame() {
+  requestAnimationFrame(animateFrame);
+  const now = performance.now();
+  const dt = Math.min(0.033, (now - (animateFrame.last || now)) / 1000 || 0.016);
+  animateFrame.last = now;
   if (game.phase === 'playing') {
     updateDayNight(dt);
-    if (player.mode === 'walk') updateWalk(dt); else updateDrive(dt);
-    for (const v of vehicles) { if (v === player.currentVehicle) continue; v.physics.update(dt, { throttle: 0, brake: 0.15, steer: 0, boost: false }); syncVehicleMesh(v); }
-    updateNPCs(dt);
-    sun.target.position.copy(protagonist.position);
-    sun.position.copy(protagonist.position).add(new THREE.Vector3(-60, 40, -80));
-    for (const p of packages) { p.children[0].rotation.y += dt * 1.5; p.children[0].position.y = 1.2 + Math.sin(now * 0.003) * 0.15; }
-    if (game.timeLeft > 0) {
-      game.timeLeft -= dt;
-      $('timer').textContent = `${String(Math.floor(game.timeLeft/60)).padStart(2,'0')}:${String(Math.floor(game.timeLeft%60)).padStart(2,'0')}`;
-      if (game.timeLeft <= 0) { showToast('TIME UP', '#ff5a7a'); game.timeLeft = game.targetTime; game.score = 0; $('scoreVal').textContent = 0; spawnPackages(); }
+    if (player.mode === 'walk') updateWalk(dt);
+    else updateDrive(dt);
+    if (navigation.destination) {
+      const p = player.mode === 'walk' ? protagonist.position : player.currentVehicle.physics.position;
+      const route = navigation.route || computeRoute(p.x, p.z, navigation.destination.x, navigation.destination.z);
+      if (route && route.waypoints.length > 1) {
+        const target = route.waypoints[navigation.currentWaypoint];
+        if (target && Math.hypot(p.x - target.x, p.z - target.z) < 1.5) navigation.currentWaypoint = Math.min(route.waypoints.length - 1, navigation.currentWaypoint + 1);
+      }
     }
-    drawMinimap();
-    if (phoneEl.classList.contains('open')) drawPhoneMap();
   }
-
-  adaptive.tick(now);
-  postProcessing.render();
+  renderer.render(scene, camera);
 }
+requestAnimationFrame(animateFrame);
 
-window.addEventListener('resize', () => { camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); });
+// =====
+// Demo initial state
+// =====
+spawnNPCs(); spawnVehicles(); spawnPackages();
 
-// Re-add rendering when unpaused
-$('btnResume').addEventListener('click', () => { needsRender = true; });
-$('btnRestart').addEventListener('click', () => { needsRender = true; });
-$('btnToMenu').addEventListener('click', () => { needsRender = true; });
+const loading = $('loading');
+setTimeout(() => {
+  loading.classList.add('hidden');
+  $('mainMenu').classList.remove('hidden');
+}, 1200);
 
-// BOOT
-spawnPackages(); spawnVehicles(); spawnNPCs();
-camera.position.set(START_X + 4, 4, START_Z + 4); camera.lookAt(START_X, 1.4, START_Z);
-$('loading').classList.add('hidden'); showMainMenu();
-renderer.setAnimationLoop(animate);
+$('btnPlay').addEventListener('click', () => {
+  $('mainMenu').classList.add('hidden');
+  loading.classList.add('hidden');
+  game.phase = 'playing';
+  $('hud').classList.remove('hidden');
+  $('phone').classList.remove('open');
+  $('mode').textContent = 'ON FOOT';
+  $('mode').classList.remove('active');
+  showToast('ROUND START', '#ff3ba0');
+});
 
+$('btnControls').addEventListener('click', () => {
+  showToast('WASD / ARROWS // E TO ENTER', '#5affff');
+});
+
+function openPauseMenu() {
+  if (game.phase !== 'playing') return;
+  game.phase = 'paused';
+  $('pauseMenu').classList.add('show');
+}
+function closePauseMenu() {
+  if (game.phase !== 'paused') return;
+  game.phase = 'playing';
+  $('pauseMenu').classList.remove('show');
+}
+$('btnResume').addEventListener('click', closePauseMenu);
+$('btnRestart').addEventListener('click', () => location.reload());
+$('btnToMenu').addEventListener('click', () => {
+  game.phase = 'menu';
+  $('pauseMenu').classList.remove('show');
+  $('hud').classList.add('hidden');
+  $('mainMenu').classList.remove('hidden');
+});
+
+// =====
+// Basic map rendering for pause menu
+// =====
+const pauseMap = $('pauseMap'); const pauseMapCtx = pauseMap.getContext('2d');
+function drawPauseMap() {
+  pauseMapCtx.clearRect(0, 0, pauseMap.width, pauseMap.height);
+  pauseMapCtx.fillStyle = '#120915'; pauseMapCtx.fillRect(0, 0, pauseMap.width, pauseMap.height);
+  const cx = pauseMap.width / 2, cy = pauseMap.height / 2, scale = 1.1;
+  pauseMapCtx.strokeStyle = '#ff3ba0'; pauseMapCtx.lineWidth = 2; pauseMapCtx.beginPath();
+  for (let i = 0; i <= GRID_N; i++) {
+    const p = -HALF_CITY + i * (BLOCK_SIZE + ROAD_WIDTH) + ROAD_WIDTH / 2;
+    const x = cx + p * scale; pauseMapCtx.moveTo(x, 0); pauseMapCtx.lineTo(x, pauseMap.height);
+    const z = cy + p * scale; pauseMapCtx.moveTo(0, z); pauseMapCtx.lineTo(pauseMap.width, z);
+  }
+  pauseMapCtx.stroke();
+  for (const b of buildingList) {
+    pauseMapCtx.fillStyle = '#2b1835';
+    pauseMapCtx.fillRect(cx + (b.x - b.w / 2) * scale, cy + (b.z - b.d / 2) * scale, b.w * scale, b.d * scale);
+  }
+  const p = player.mode === 'walk' ? protagonist.position : player.currentVehicle.physics.position;
+  pauseMapCtx.fillStyle = '#7ef0c0'; pauseMapCtx.beginPath(); pauseMapCtx.arc(cx + p.x * scale, cy + p.z * scale, 6, 0, Math.PI * 2); pauseMapCtx.fill();
+}
+setInterval(drawPauseMap, 500);
 </script>
 </body>
 </html>
